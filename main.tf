@@ -62,6 +62,7 @@ resource "aws_iam_role_policy_attachment" "custom" {
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
+  
   count = var.enabled && var.create_oidc_provider ? 1 : 0
 
   client_id_list = concat(
@@ -71,5 +72,12 @@ resource "aws_iam_openid_connect_provider" "github" {
 
   tags            = var.tags
   thumbprint_list = [data.tls_certificate.github.certificates[0].sha1_fingerprint]
-  url             = "token.actions.githubusercontent.com"
+  url             = "https://token.actions.githubusercontent.com"
+
+  lifecycle {
+    ignore_changes = [
+      # Weird create/destroy behavior if we don't ignore this
+      client_id_list
+    ]
+  }
 }
